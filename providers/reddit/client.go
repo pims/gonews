@@ -19,7 +19,12 @@ var (
 type redditResponse struct {
 	Data struct {
 		Children []struct {
-			Data *story.Story `json:"data"`
+			Data struct {
+				Title       string `json:"title"`
+				URL         string `json:"url"`
+				Comments    int    `json:"num_comments"`
+				CommentsURL string `json:"permalink"`
+			} `json:"data"`
 		} `json:"children"`
 	} `json:"data"`
 }
@@ -64,7 +69,12 @@ func getStories(url string) ([]*story.Story, error) {
 
 	result := make([]*story.Story, 0)
 	for _, s := range rr.Data.Children {
-		result = append(result, s.Data)
+		result = append(result, &story.Story{
+			Title:         s.Data.Title,
+			URL:           s.Data.URL,
+			CommentsURL:   "https://old.reddit.com" + s.Data.CommentsURL,
+			CommentsCount: s.Data.Comments,
+		})
 	}
 
 	return result, nil
