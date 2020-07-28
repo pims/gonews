@@ -16,8 +16,8 @@ func TestFakeName(t *testing.T) {
 
 func TestFakeGetStories(t *testing.T) {
 	stories := []*story.Story{
-		{"Foo", "http://golang.org"},
-		{"Bar", "http://google.com"},
+		{Title: "Foo", URL: "http://golang.org"},
+		{Title: "Bar", URL: "http://google.com"},
 	}
 
 	fake := &Fake{stories}

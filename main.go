@@ -24,7 +24,7 @@ var (
 )
 
 func init() {
-	flag.IntVar(&limit, "limit", 10, "Number of Stories to get")
+	flag.IntVar(&limit, "limit", 25, "Number of Stories to get")
 	flag.StringVar(&flagStoryType, "type", "top", "Stories Type ('new' or 'top')")
 	flag.StringVar(
 		&flagProviderType, "provider", "hackernews",

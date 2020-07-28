@@ -2,9 +2,11 @@ package gui
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/drgarcia1986/gonews/story"
 	"github.com/drgarcia1986/gonews/utils"
+	"github.com/fatih/color"
 	"github.com/jroimartin/gocui"
 )
 
@@ -59,6 +61,14 @@ func (gui *Gui) preview(g *gocui.Gui, v *gocui.View) error {
 	return showPreview(g, s.Title, content)
 }
 
+func (gui *Gui) comments(g *gocui.Gui, v *gocui.View) error {
+	s, err := gui.getStoryOfCurrentLine(v)
+	if err == nil && s != nil {
+		return utils.OpenURL(s.CommentsURL)
+	}
+	return err
+}
+
 func (gui *Gui) getStoryOfCurrentLine(v *gocui.View) (*story.Story, error) {
 	_, cy := v.Cursor()
 	line, err := v.Line(cy)
@@ -67,7 +77,7 @@ func (gui *Gui) getStoryOfCurrentLine(v *gocui.View) (*story.Story, error) {
 	}
 
 	for _, s := range gui.items {
-		if s.Title == line {
+		if strings.Contains(line, s.Title) {
 			return s, nil
 		}
 	}
@@ -82,11 +92,36 @@ func (gui *Gui) layout(g *gocui.Gui) error {
 		}
 		v.Title = fmt.Sprintf("GoNews - %s ('?' for help)", gui.providerName)
 		v.Highlight = true
-		v.SelBgColor = gocui.ColorGreen
+		v.SelBgColor = gocui.ColorBlue
 		v.SelFgColor = gocui.ColorBlack
+		v.FgColor = gocui.ColorWhite
+
+		colored := func(s string) string {
+			code := int(color.FgMagenta)
+			attr := []color.Attribute{color.Attribute(code)}
+			return color.New(attr...).SprintFunc()(s)
+		}
+
+		pretty := func(s *story.Story) string {
+
+			comments := ""
+			switch {
+			case s.CommentsCount > 100:
+				comments = "[" + colored(fmt.Sprintf("%d", s.CommentsCount)) + "]"
+			case s.CommentsCount > 0:
+				comments = fmt.Sprintf("[%d]", s.CommentsCount)
+			}
+
+			return fmt.Sprintf(
+				"%s %s %s",
+				colored(s.Title),
+				s.Domain(gui.providerName),
+				comments,
+			)
+		}
 
 		for _, story := range gui.items {
-			fmt.Fprintln(v, story.Title)
+			fmt.Fprintln(v, pretty(story))
 		}
 
 		if _, err := g.SetCurrentView("main"); err != nil {
@@ -110,6 +145,10 @@ func (gui *Gui) keybindings(g *gocui.Gui) error {
 	}
 
 	if err := g.SetKeybinding("main", 'p', gocui.ModNone, gui.preview); err != nil {
+		return err
+	}
+
+	if err := g.SetKeybinding("main", 'c', gocui.ModNone, gui.comments); err != nil {
 		return err
 	}
 
