@@ -10,11 +10,11 @@ import (
 
 func TestGetStories(t *testing.T) {
 	expectedStories := []*story.Story{
-		{"Foo", "http://golang.org"},
-		{"Bar", "http://google.com"},
+		{Title: "Foo", URL: "http://golang.org"},
+		{Title: "Bar", URL: "http://google.com"},
 	}
 
-	fake := &providers.Fake{expectedStories}
+	fake := &providers.Fake{Stories: expectedStories}
 	c := New(fake, progressbar.New())
 
 	stories, err := c.GetStories(1, 1)

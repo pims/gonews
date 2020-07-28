@@ -23,6 +23,10 @@ func getStoryURL(id int) string {
 	return fmt.Sprintf("%s/%d.json", urlStoryBase, id)
 }
 
+func getCommentsURL(id int) string {
+	return fmt.Sprintf("https://news.ycombinator.com/item?id=%d", id)
+}
+
 func getStoryIds(url string) ([]int, error) {
 	resp, err := http.Get(url)
 	if err != nil {
@@ -56,12 +60,23 @@ func getStory(id int) (*story.Story, error) {
 		return nil, err
 	}
 
-	var story story.Story
+	type r struct {
+		Title    string `json:"Title"`
+		URL      string `json:"url"`
+		Comments int    `json:"descendants"`
+	}
+	var temp r
 
-	if err = json.Unmarshal(body, &story); err != nil {
+	if err = json.Unmarshal(body, &temp); err != nil {
 		return nil, err
 	}
-	return &story, nil
+
+	return &story.Story{
+		Title:         temp.Title,
+		URL:           temp.URL,
+		CommentsCount: temp.Comments,
+		CommentsURL:   getCommentsURL(id),
+	}, nil
 }
 
 func getURL(storyType int) string {
