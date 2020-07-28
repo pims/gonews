@@ -11,6 +11,7 @@ import (
 	"github.com/drgarcia1986/gonews/progressbar"
 	"github.com/drgarcia1986/gonews/providers"
 	"github.com/drgarcia1986/gonews/providers/hackernews"
+	"github.com/drgarcia1986/gonews/providers/lobsters"
 	"github.com/drgarcia1986/gonews/providers/reddit"
 	"github.com/drgarcia1986/gonews/story"
 	"github.com/drgarcia1986/gonews/utils"
@@ -50,6 +51,8 @@ func getProvider(providerType string) providers.Provider {
 		return hackernews.New()
 	case "reddit":
 		return reddit.New()
+	case "lobsters":
+		return lobsters.New()
 	default:
 		providerArgs := strings.Split(providerType, "-")
 		if len(providerArgs) != 2 || providerArgs[0] != "reddit" {
